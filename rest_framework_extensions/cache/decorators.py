@@ -2,7 +2,7 @@
 from functools import wraps
 
 from django.utils.decorators import available_attrs
-
+from django.utils.functional import cached_property
 
 from rest_framework_extensions.settings import extensions_api_settings
 from django.utils import six
@@ -34,7 +34,11 @@ class CacheResponse(object):
         else:
             self.cache_errors = cache_errors
 
-        self.cache = get_cache(cache or extensions_api_settings.DEFAULT_USE_CACHE)
+        self._cache = cache
+
+    @cached_property
+    def cache(self):
+        return get_cache(self._cache or extensions_api_settings.DEFAULT_USE_CACHE)
 
     def __call__(self, func):
         this = self

@@ -8,6 +8,7 @@ from django.test import TestCase
 from rest_framework import views
 from rest_framework.response import Response
 
+import rest_framework_extensions
 from rest_framework_extensions.test import APIRequestFactory
 from rest_framework_extensions.cache.decorators import cache_response
 from rest_framework_extensions.settings import extensions_api_settings
@@ -203,7 +204,6 @@ class CacheResponseTest(TestCase):
         cache_response_decorator = cache_response(cache_errors=False)
 
         class TestView(views.APIView):
-
             def __init__(self, status, *args, **kwargs):
                 self.status = status
                 super(TestView, self).__init__(*args, **kwargs)
@@ -223,7 +223,6 @@ class CacheResponseTest(TestCase):
         cache_response_decorator = cache_response()
 
         class TestView(views.APIView):
-
             def __init__(self, status, *args, **kwargs):
                 self.status = status
                 super(TestView, self).__init__(*args, **kwargs)
@@ -250,3 +249,8 @@ class CacheResponseTest(TestCase):
     )
     def test_should_use_cache_error_from_decorator_if_it_is_specified(self):
         self.assertTrue(cache_response(cache_errors=True).cache_errors)
+
+    def test_dont_connect_to_cache_on_init(self):
+        with patch('rest_framework_extensions.cache.decorators.get_cache'):
+            cache_response()
+            self.assertFalse(rest_framework_extensions.cache.decorators.get_cache.called)
